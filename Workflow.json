@@ -1,0 +1,198 @@
+{
+  "name": "My workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "lead-parser",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -448,
+        0
+      ],
+      "id": "76466f9b-bc25-4504-aaaf-3c20a687dd9d",
+      "name": "Webhook",
+      "webhookId": "80efde28-e4cb-4ef2-b1ca-1de31ae145c1"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.groq.com/openai/v1/chat/completions",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "=json",
+        "bodyParameters": {
+          "parameters": [
+            {}
+          ]
+        },
+        "jsonBody": "={{\n  JSON.stringify({\n    \"model\": \"openai/gpt-oss-120b\",\n    \"messages\": [\n      {\n        \"role\": \"system\",\n        \"content\": \"You are an AI lead data parser. Extract name, job_title, company, email, phone. Provide JSON format only.\"\n      },\n      {\n        \"role\": \"user\",\n        \"content\": $json.body?.text || $json.text\n      }\n    ]\n  })\n}}\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        -208,
+        0
+      ],
+      "id": "b453da8a-a20a-4a67-ad65-a7078bcf0fa9",
+      "name": "HTTP Request",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "ohEZXtt3oDpwVKsC",
+          "name": "Header Auth account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "dataTableId": {
+          "__rl": true,
+          "value": "c8iZG50FkJPoL7FC",
+          "mode": "list",
+          "cachedResultName": "Leads_DB",
+          "cachedResultUrl": "/projects/9rCvxmcAq4DgFSXs/datatables/c8iZG50FkJPoL7FC"
+        },
+        "columns": {
+          "mappingMode": "autoMapInputData",
+          "value": {},
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Name",
+              "displayName": "Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Job_title",
+              "displayName": "Job_title",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Company",
+              "displayName": "Company",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Email",
+              "displayName": "Email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Phone",
+              "displayName": "Phone",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        240,
+        0
+      ],
+      "id": "5fe676ee-21dc-460e-8720-023aa5f772da",
+      "name": "Insert row"
+    },
+    {
+      "parameters": {
+        "jsCode": "const raw = $input.all()[0].json.choices[0].message.content;\n\nlet clean = raw.trim();\nif (clean.includes(\"```json\")) {\n  clean = clean.split(\"```json\")[1].split(\"```\")[0].trim();\n} else if (clean.includes(\"```\")) {\n  clean = clean.split(\"```\")[1].split(\"```\")[0].trim();\n}\n\nlet parsed = [];\ntry {\n  const data = JSON.parse(clean);\n  parsed = Array.isArray(data) ? data : [data];\n} catch (e) {\n console.error(\"JSON parse error:\", e);\n}\n\nreturn parsed.map(item => ({\n  json: {\n    name: item.name || \"Null\",\n    job_title: item.job_title || \"Null\",\n    company: item.company || \"Null\",\n    email: item.email || \"Null\",\n    phone: item.phone || \"Null\"\n  }\n}));\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        16,
+        0
+      ],
+      "id": "8af6b73c-8c60-43a9-b190-20cbb555c231",
+      "name": "Code in JavaScript"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Insert row": {
+      "main": [
+        []
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Insert row",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "84a9ec40-60d2-4c6f-a601-486adcf2239d",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "17173957ad7412c4d8ed42ba1c9bb145de1f365a14d26d8b9f035b87f92d400e"
+  },
+  "nodeGroups": [],
+  "id": "sAQzN9LFfqqmcG1G",
+  "tags": []
+}
