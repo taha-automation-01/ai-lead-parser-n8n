@@ -18,8 +18,6 @@ Database Storage: Automatically maps normalized lead records into dedicated tabl
 Workflow Orchestration: n8n
 LLM Engine: Groq API (gpt-oss-120b)
 Data Processing: JavaScript (Node.js runtime inside n8n) & Python
-![n8n Workflow Architecture](workflow-architecture.png)
-
 Database: Relational Database / PostgreSQL / Airtable
 📋 Schema Output
 The pipeline outputs normalized data in the following structure:
@@ -34,8 +32,6 @@ json
 "phone": "+1-555-0199"
   }
 ]
-![Parsed Leads Database](database-results.png)
-
 🚀 How to Run & Import
 Clone or download this repository.
 In your n8n instance:
