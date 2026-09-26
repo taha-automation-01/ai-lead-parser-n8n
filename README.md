@@ -8,6 +8,9 @@ An end-to-end automated pipeline designed to extract structured lead information
 ---
 
 ## 📌 Architecture & Workflow
+
+![n8n Workflow Architecture](workflow-architecture.png)
+
 ```text
 [ Incoming Webhook ] ──▶ [ Groq API ] ──▶ [ JavaScript Parsing ] ──▶ [ Database / Leads_DB ]
 Webhook Trigger: Receives raw unstructured text via HTTP POST requests.
@@ -19,7 +22,13 @@ Workflow Orchestration: n8n
 LLM Engine: Groq API (gpt-oss-120b)
 Data Processing: JavaScript (Node.js runtime inside n8n) & Python
 Database: Relational Database / PostgreSQL / Airtable
-📋 Schema Output
+```
+
+##📊 Results / Database Schema
+
+![Parsed Leads Database](database-results.png)
+
+```text
 The pipeline outputs normalized data in the following structure:
 
 json
